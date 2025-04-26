@@ -1,5 +1,3 @@
-using System;
-
 namespace TodoList.Models
 {
     public class TodoViewModel

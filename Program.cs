@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Mvc; // Needed for Problem details
-using Microsoft.Extensions.Logging; // Add this using statement
 using System.IdentityModel.Tokens.Jwt; // Add this for JwtRegisteredClaimNames
 
 var builder = WebApplication.CreateBuilder(args);
