@@ -1,6 +1,6 @@
 # Cat Fact ToDo Tracker API
 
-This is a simple ToDo API built with .NET Core Minimal APIs that allows users to register, log in, and manage ToDo items. Each ToDo item automatically includes a random cat fact fetched from an external API upon creation.
+This is a simple ToDo API built with .NET Core Minimal APIs that allows users to register, log in, and manage ToDo items. Each ToDo item automatically includes a random cat fact fetched from an external API upon creation, and weather information for the ToDo's date (based on a fixed location).
 
 ## Features
 
@@ -8,6 +8,7 @@ This is a simple ToDo API built with .NET Core Minimal APIs that allows users to
 - Password hashing using BCrypt.
 - Create ToDo items (message, date).
 - Fetches and stores a cat fact with each new ToDo item.
+- Fetches and includes weather information (description and max temperature) for the ToDo's date when retrieving items.
 - View all ToDo items belonging to the authenticated user.
 - Swagger/OpenAPI documentation for API testing.
 
@@ -44,10 +45,10 @@ This is a simple ToDo API built with .NET Core Minimal APIs that allows users to
 - **POST** `/api/todos` (Requires Authentication): Create a new ToDo item.
   - Header: `Authorization: Bearer <your_jwt_token>`
   - Body: `{ "message": "string", "date": "YYYY-MM-DD" }`
-  - Returns: The created ToDo item with the cat fact.
+  - Returns: The created ToDo item with the cat fact and weather description.
 - **GET** `/api/todos` (Requires Authentication): Get all ToDo items for the logged-in user.
   - Header: `Authorization: Bearer <your_jwt_token>`
-  - Returns: An array of ToDo items.
+  - Returns: An array of ToDo items, each including a cat fact and weather description.
 
 ## Technology Stack
 
