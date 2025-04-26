@@ -16,12 +16,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // --- Configuration ---
 var jwtSettings = builder.Configuration.GetSection("Jwt");
-// ... other settings ...
 var keyString = jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key not found in AddJwtBearer.");
-var keyBytes = Encoding.UTF8.GetBytes(keyString); // Correct encoding
-var securityKey = new SymmetricSecurityKey(keyBytes); // Correct key type
+var keyBytes = Encoding.UTF8.GetBytes(keyString);
+var securityKey = new SymmetricSecurityKey(keyBytes);
 var catFactApiUrl = builder.Configuration["CatFactApiUrl"] ?? "https://catfact.ninja/";
-var weatherApiUrl = builder.Configuration["WeatherApiUrl"] ?? "https://api.open-meteo.com/"; // Add this line
+var weatherApiUrl = builder.Configuration["WeatherApiUrl"] ?? "https://api.open-meteo.com/";
 
 // --- Services ---
 
@@ -63,7 +62,7 @@ builder.Services.AddAuthentication(options =>
     var keyBytes = Encoding.UTF8.GetBytes(keyString);
     var securityKey = new SymmetricSecurityKey(keyBytes);
 
-    options.MapInboundClaims = false; // <-- Add this line to prevent default claim mapping
+    options.MapInboundClaims = false; // prevent default claim mapping
 
     options.RequireHttpsMetadata = builder.Environment.IsProduction();
     options.SaveToken = true;
@@ -85,7 +84,6 @@ builder.Services.AddAuthentication(options =>
     {
         OnAuthenticationFailed = context =>
         {
-            // Basic logging is often sufficient unless deep debugging
             Console.WriteLine($"JWT Authentication Failed: {context.Exception?.Message}");
             return Task.CompletedTask;
         },
@@ -94,7 +92,6 @@ builder.Services.AddAuthentication(options =>
             Console.WriteLine($"JWT Token Validated for user: {context.Principal?.Identity?.Name}");
             return Task.CompletedTask;
         }
-        // Remove OnChallenge and OnMessageReceived unless specific customization is needed
     };
 });
 
@@ -147,8 +144,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Cat Fact Todo API V1");
-        // Optional: Serve Swagger UI at the app's root
-        // c.RoutePrefix = string.Empty;
     });
     app.UseDeveloperExceptionPage(); // More detailed errors in dev
 }
@@ -178,7 +173,7 @@ app.MapPost("/api/auth/register", async (RegisterModel model, AuthService authSe
 })
 .AllowAnonymous()
 .Produces(StatusCodes.Status200OK)
-.Produces<ProblemDetails>(StatusCodes.Status400BadRequest) // Use ProblemDetails for consistency
+.Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
 .WithName("RegisterUser")
 .WithTags("Authentication");
 
@@ -265,7 +260,7 @@ app.MapPost("/api/todos", async (TodoCreateModel model, ClaimsPrincipal user, To
 
     return Results.Created($"/api/todos/{createdTodoViewModel.Id}", createdTodoViewModel);
 })
-.RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme }) // Explicit Scheme
+.RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme })
 .Produces<TodoViewModel>(StatusCodes.Status201Created)
 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
 .Produces(StatusCodes.Status401Unauthorized)
