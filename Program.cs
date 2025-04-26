@@ -20,7 +20,8 @@ var jwtSettings = builder.Configuration.GetSection("Jwt");
 var keyString = jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key not found in AddJwtBearer.");
 var keyBytes = Encoding.UTF8.GetBytes(keyString); // Correct encoding
 var securityKey = new SymmetricSecurityKey(keyBytes); // Correct key type
-var catFactApiUrl = builder.Configuration["CatFactApiUrl"] ?? "https://catfact.ninja/fact";
+var catFactApiUrl = builder.Configuration["CatFactApiUrl"] ?? "https://catfact.ninja/";
+var weatherApiUrl = builder.Configuration["WeatherApiUrl"] ?? "https://api.open-meteo.com/"; // Add this line
 
 // --- Services ---
 
@@ -36,6 +37,13 @@ builder.Services.AddScoped<TodoService>();
 builder.Services.AddHttpClient("CatFactClient", client =>
 {
     client.BaseAddress = new Uri(catFactApiUrl);
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
+
+// Add HttpClient for Weather API
+builder.Services.AddHttpClient("WeatherClient", client =>
+{
+    client.BaseAddress = new Uri(weatherApiUrl);
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 
@@ -242,13 +250,17 @@ app.MapPost("/api/todos", async (TodoCreateModel model, ClaimsPrincipal user, To
         return Results.Problem("Failed to create Todo item.");
     }
 
+    // Fetch weather description for the newly created item
+    string weatherDesc = await todoService.GetWeatherDescriptionAsync(createdTodoItem.Date);
+
     // Map TodoItem to TodoViewModel for the response
     var createdTodoViewModel = new TodoViewModel
     {
         Id = createdTodoItem.Id,
         Message = createdTodoItem.Message,
         Date = createdTodoItem.Date,
-        CatFact = createdTodoItem.CatFact
+        CatFact = createdTodoItem.CatFact,
+        WeatherDescription = weatherDesc // Populate weather description
     };
 
     return Results.Created($"/api/todos/{createdTodoViewModel.Id}", createdTodoViewModel);

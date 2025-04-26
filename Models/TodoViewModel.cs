@@ -5,8 +5,9 @@ namespace TodoList.Models
     public class TodoViewModel
     {
         public int Id { get; set; }
-        public string Message { get; set; } = string.Empty;
+        public required string Message { get; set; }
         public DateOnly Date { get; set; }
-        public string CatFact { get; set; } = string.Empty;
+        public string? CatFact { get; set; }
+        public string? WeatherDescription { get; set; }
     }
 }
