@@ -8,7 +8,7 @@ This is a simple ToDo API built with .NET Core Minimal APIs that allows users to
 - Password hashing using BCrypt.
 - Create ToDo items (message, date).
 - Fetches and stores a cat fact with each new ToDo item.
-- Fetches and includes weather information (description and max temperature) for the ToDo's date when retrieving items.
+- Fetches and includes the _current_ weather information (description and temperature) for Bangkok when retrieving items.
 - View all ToDo items belonging to the authenticated user.
 - Swagger/OpenAPI documentation for API testing.
 
@@ -45,10 +45,10 @@ This is a simple ToDo API built with .NET Core Minimal APIs that allows users to
 - **POST** `/api/todos` (Requires Authentication): Create a new ToDo item.
   - Header: `Authorization: Bearer <your_jwt_token>`
   - Body: `{ "message": "string", "date": "YYYY-MM-DD" }`
-  - Returns: The created ToDo item with the cat fact and weather description.
+  - Returns: The created ToDo item with the cat fact and current weather description for Bangkok.
 - **GET** `/api/todos` (Requires Authentication): Get all ToDo items for the logged-in user.
   - Header: `Authorization: Bearer <your_jwt_token>`
-  - Returns: An array of ToDo items, each including a cat fact and weather description.
+  - Returns: An array of ToDo items, each including a cat fact and the current weather description for Bangkok.
 
 ## Technology Stack
 

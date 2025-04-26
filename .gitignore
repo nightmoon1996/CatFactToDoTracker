@@ -3,6 +3,7 @@
 *.user
 *.userosscache
 *.sln.docstates
+*.userprefs # Add user preferences files
 
 ## Ignore Visual Studio Generated files
 *_i.c
