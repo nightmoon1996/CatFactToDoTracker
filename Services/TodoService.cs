@@ -83,15 +83,16 @@ namespace TodoList.Services
         }
 
         // Make public to be callable from Program.cs POST handler
-        public async Task<string> GetWeatherDescriptionAsync(DateOnly date)
+        public async Task<string> GetWeatherDescriptionAsync(DateOnly date) // date parameter is kept for compatibility but not used for current weather
         {
             // Coordinates for Bangkok, Thailand
             double latitude = 13.7563;
             double longitude = 100.5018;
-            string formattedDate = date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            // string formattedDate = date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture); // No longer needed for current weather
 
-            // Construct the API URL - Updated timezone to Asia/Bangkok
-            string requestUrl = $"v1/forecast?latitude={latitude}&longitude={longitude}&daily=weathercode,temperature_2m_max&timezone=Asia/Bangkok&start_date={formattedDate}&end_date={formattedDate}";
+            // Construct the API URL for CURRENT weather - Updated timezone and parameters
+            // Requesting current weather variables
+            string requestUrl = $"v1/forecast?latitude={latitude}&longitude={longitude}&current=temperature_2m,weathercode&timezone=Asia/Bangkok";
 
             try
             {
@@ -99,27 +100,29 @@ namespace TodoList.Services
                 var response = await client.GetAsync(requestUrl);
                 response.EnsureSuccessStatusCode();
 
-                // Deserialize only the relevant 'daily' part
-                var weatherData = await response.Content.ReadFromJsonAsync<OpenMeteoDailyResponse>();
+                // Deserialize the response using the new current weather model
+                var weatherData = await response.Content.ReadFromJsonAsync<OpenMeteoCurrentResponse>();
 
-                if (weatherData?.daily?.weathercode?.Length > 0 && weatherData.daily.temperature_2m_max?.Length > 0)
+                // Extract data from the 'current' object
+                if (weatherData?.current != null)
                 {
-                    int weatherCode = weatherData.daily.weathercode[0];
-                    double maxTemp = weatherData.daily.temperature_2m_max[0];
+                    int weatherCode = weatherData.current.weathercode;
+                    double currentTemp = weatherData.current.temperature_2m; // Use current temperature field
                     string description = InterpretWeatherCode(weatherCode);
-                    return $"{description}, Max Temp: {maxTemp}°C";
+                    // Update the return string format for current weather
+                    return $"{description}, Temp: {currentTemp}°C";
                 }
-                return "Weather data unavailable.";
+                return "Current weather data unavailable.";
             }
             catch (HttpRequestException ex)
             {
-                Console.WriteLine($"Error fetching weather data: {ex.Message}");
-                return "Could not fetch weather due to network error.";
+                Console.WriteLine($"Error fetching current weather data: {ex.Message}");
+                return "Could not fetch current weather due to network error.";
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Unexpected error fetching weather data: {ex.Message}");
-                return "Could not fetch weather due to an unexpected error.";
+                Console.WriteLine($"Unexpected error fetching current weather data: {ex.Message}");
+                return "Could not fetch current weather due to an unexpected error.";
             }
         }
 
@@ -159,6 +162,22 @@ namespace TodoList.Services
                 _ => "Unknown weather code"
             };
         }
+    }
+
+    // Specific model for Open-Meteo CURRENT weather response structure
+    public class OpenMeteoCurrentResponse
+    {
+        public CurrentWeatherData? current { get; set; }
+        // Include other top-level properties if needed (e.g., latitude, longitude, timezone)
+    }
+
+    public class CurrentWeatherData
+    {
+        public string? time { get; set; }
+        public int interval { get; set; }
+        public double temperature_2m { get; set; } // Field name for current temp
+        public int weathercode { get; set; }
+        // Add other current weather fields if needed (e.g., wind_speed_10m)
     }
 
     // Specific model for Open-Meteo daily response structure
